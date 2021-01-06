@@ -55,7 +55,7 @@ const UserMenu: React.FC<Props> = props => {
   }
 
   const hasPicture = (providedPicture, picture) => {
-    if (providedPicture === true) {
+    if (picture) {
       return (
         <View style={{justifyContent: 'center', alignItems: 'center'}}>
           <Image

@@ -25,7 +25,7 @@ const GlobalStyles = StyleSheet.create({
         backgroundColor: Colors.mainForeGround,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: wp('1.3%'),
+        padding: wp('1.5%'),
         borderRadius: wp('3%'),
         margin: hp('2%'),
     },buttonText:{

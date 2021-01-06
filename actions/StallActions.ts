@@ -1,6 +1,6 @@
 import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
-import {Alert} from 'react-native'
+import { Alert } from 'react-native'
 
 interface stallArr {
   name: string
@@ -20,7 +20,7 @@ export const AddStallToDB = (
   vegetarian: boolean,
 ) => {
   return dispatch => {
-    dispatch({type: 'flipLoading', value: true})
+    dispatch({ type: 'flipLoading', value: true })
     firestore()
       .collection('Stalls')
       .add({
@@ -34,11 +34,11 @@ export const AddStallToDB = (
       })
       .then(() => {
         Alert.alert('Stall Added successfully')
-        dispatch({type: 'flipLoading', value: false})
+        dispatch({ type: 'flipLoading', value: false })
       })
       .catch(err => {
         Alert.alert('Error adding the stall')
-        dispatch({type: 'flipLoading', value: false})
+        dispatch({ type: 'flipLoading', value: false })
       })
   }
 }
@@ -50,7 +50,7 @@ export const fetchAllStalls = () => {
       .orderBy('name')
       .get()
       .then(doc => {
-        dispatch({type: 'fetch_stalls_success', payload: doc.docs})
+        dispatch({ type: 'fetch_stalls_success', payload: doc.docs })
       })
       .catch(e => {
         Alert.alert('Error loading Stalls')
@@ -59,44 +59,44 @@ export const fetchAllStalls = () => {
   }
 }
 
-export const checkSimilarity = (allStalls: any, name: string) => {
+export const checkSimilarity = (allStalls: any[], name: string) => {
   return dispatch => {
-    if(!allStalls || allStalls.length == 0) return false;
-    dispatch({type: 'flipLoading', value: true})
-    let start = 0,
-      end = allStalls.length - 1
+    if (!allStalls || allStalls.length == 0) return false;
+    if(allStalls.length == 1) return allStalls[0].data().name === name ? true : false
+    dispatch({ type: 'flipLoading', value: true })
+    let start = 0, end = allStalls.length - 1
     let mid = Math.floor((start + end) / 2)
     while (allStalls[mid].data().name !== name && start <= end) {
       if (name < allStalls[mid].data().name) end = mid - 1
       else start = mid + 1
       mid = Math.floor((start + end) / 2)
     }
-    dispatch({type: 'flipLoading', value: false})
+    dispatch({ type: 'flipLoading', value: false })
     return allStalls[mid].data().name === name ? true : false
   }
 }
 
-export const writeStallReview =(review: string, docId: number, name: string,
+export const writeStallReview = (review: string, docId: number, name: string,
   location: string,
   description: string,
   imagePicker: string,
   providedPicture: boolean,
-  vegetarian: boolean, reviews: any[], userId: number)=>{
-  return dispatch =>{
-    reviews.push({reviewId: userId, reviewText: review})
+  vegetarian: boolean, reviews: any[], userId: number) => {
+  return dispatch => {
+    reviews.push({ reviewId: userId, reviewText: review })
     firestore().collection('Stalls').doc(docId.toString())
-    .set({
-      name,
+      .set({
+        name,
         location,
         description,
         imagePicker,
         providedPicture,
         vegetarian,
         reviews,
-    }).then(() =>{
-      Alert.alert('Review added successfully')
-    }).catch(() =>{
-      Alert.alert("Error adding the review")
-    })
+      }).then(() => {
+        Alert.alert('Review added successfully')
+      }).catch(() => {
+        Alert.alert("Error adding the review")
+      })
   }
 }

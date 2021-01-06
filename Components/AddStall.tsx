@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -9,18 +9,19 @@ import {
   Alert,
 } from 'react-native'
 import HeaderArrow from './common/HeaderArrow'
-import {GlobalStyles, Colors, textInputTheme} from './Constants'
-import {Credential, AddStallToDB, checkSimilarity} from '../actions'
-import {connect} from 'react-redux'
+import { GlobalStyles, Colors, textInputTheme } from './Constants'
+import { Credential, AddStallToDB, checkSimilarity } from '../actions'
+import { connect } from 'react-redux'
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen'
-import {DrawerNavigationProp} from '@react-navigation/drawer'
-import {TextInput, Switch} from 'react-native-paper'
+import { DrawerNavigationProp } from '@react-navigation/drawer'
+import { TextInput, Switch } from 'react-native-paper'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Spinner from './common/Spinner';
 import ImgToBase64 from 'react-native-image-base64'
+import { launchImageLibrary } from 'react-native-image-picker/src'
 
 interface Cred {
   prop: string
@@ -72,13 +73,13 @@ const Cart: React.FC<Props> = props => {
     if (imagePicker) {
       return (
         <Image
-          source={{uri: `data:image/jpeg;base64,${imagePicker}`}}
+          source={{ uri: `data:image/jpeg;base64,${imagePicker}` }}
           style={styles.images}
         />
       )
     } else {
       return (
-        <View style={{justifyContent: 'center', alignItems: 'center'}}>
+        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <Image
             source={require('../Images/default.jpg')}
             style={styles.images}
@@ -89,16 +90,18 @@ const Cart: React.FC<Props> = props => {
   }
 
   const chooseImage = () => {
-    /*ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      cropping: true,
-    }).then(image => {
-      ImgToBase64.getBase64String(image.path)
-        .then(base64String => setImagePicker(base64String))
-        .catch(err => console.error(err))
-      Credential({prop: 'providedPicture', value: true})
-    })*/
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        includeBase64: true,
+        maxHeight: 300,
+        maxWidth: 400,
+      },
+      (response) => {
+        ImgToBase64.getBase64String(response.uri)
+          .then(base64String => setImagePicker(base64String))
+          .catch(err => console.error(err));
+      })
   }
 
   const checkStallDetails = () => {
@@ -114,7 +117,8 @@ const Cart: React.FC<Props> = props => {
       Alert.alert('Stall Description must be 5-280 chars long')
     } else {
       if (checkSimilarity(allStalls, name) === false) {
-        if (imagePicker.length == 0)Credential({prop: 'providedPicture', value: false})
+        if (!imagePicker) Credential({ prop: 'providedPicture', value: false })
+        else Credential({ prop: 'providedPicture', value: true })
         AddStallToDB(
           name,
           location,
@@ -130,105 +134,108 @@ const Cart: React.FC<Props> = props => {
   }
 
   const showButton = () => {
-    if (stallLoading) {
+    if (stallLoading == true) {
       return (
         <View style={styles.spinnerContainer}>
           <Spinner size={true} />
         </View>
       )
-    }else{
-      return(
+    } else {
+      return (
         <TouchableOpacity
           onPress={() => checkStallDetails()}
           style={GlobalStyles.buttonContainer}>
           <Text style={GlobalStyles.buttonText}>Add food stall</Text>
         </TouchableOpacity>
+
       )
     }
   }
 
   return (
-    <View style={styles.container}>
-      <HeaderArrow
-        HeaderText={'Add Food Stall'}
-        HeaderStyle={{backgroundColor: 'transparent'}}
-        TextStyle={GlobalStyles.headerTextStyle}
-        navigateMeBack={() => DrawerNavigationToggle()}
-        iconName={'menu'}
-        iconColor={Colors.mainForeGround}
-      />
-      <ScrollView contentContainerStyle={styles.innerContainer}>
-        <TextInput
-          right={
-            <TextInput.Icon name='account' color={Colors.mainForeGround} />
-          }
-          mode='outlined'
-          multiline={false}
-          style={GlobalStyles.textInputContainer}
-          label='Stall Name'
-          value={name}
-          onChangeText={text => Credential({prop: 'name', value: text})}
-          theme={textInputTheme}
+      <View style={styles.container}>
+        <HeaderArrow
+          HeaderText={'Add Food Stall'}
+          HeaderStyle={{ backgroundColor: 'transparent' }}
+          TextStyle={GlobalStyles.headerTextStyle}
+          navigateMeBack={() => DrawerNavigationToggle()}
+          iconName={'menu'}
+          iconColor={Colors.mainForeGround}
         />
-        <TextInput
-          right={
-            <TextInput.Icon
-              name={() => (
-                <MaterialIcons
-                  name='add-location'
-                  color={Colors.mainForeGround}
-                  size={25}
-                />
-              )}
-            />
-          }
-          mode='outlined'
-          multiline={false}
-          style={GlobalStyles.textInputContainer}
-          label='Location'
-          value={location}
-          onChangeText={text => Credential({prop: 'location', value: text})}
-          theme={textInputTheme}
-        />
-        <View style={styles.switchStyle}>
-          <Text style={styles.veganText}>Vegetarian</Text>
-          <Switch
-            value={vegetarian}
-            color={Colors.mainForeGround}
-            onValueChange={() =>
-              Credential({prop: 'vegetarian', value: !vegetarian})
+        <ScrollView contentContainerStyle={{flexGrow: 1}}>
+        <View style={styles.innerContainer}>
+          <TextInput
+            right={
+              <TextInput.Icon name='account' color={Colors.mainForeGround} />
             }
+            mode='outlined'
+            multiline={false}
+            style={GlobalStyles.textInputContainer}
+            label='Stall Name'
+            value={name}
+            onChangeText={text => Credential({ prop: 'name', value: text })}
+            theme={textInputTheme}
           />
-        </View>
-        <TextInput
-          right={
-            <TextInput.Icon
-              name={() => (
-                <MaterialIcons
-                  name='description'
-                  color={Colors.mainForeGround}
-                  size={25}
-                />
-              )}
+          <TextInput
+            right={
+              <TextInput.Icon
+                name={() => (
+                  <MaterialIcons
+                    name='add-location'
+                    color={Colors.mainForeGround}
+                    size={25}
+                  />
+                )}
+              />
+            }
+            mode='outlined'
+            multiline={false}
+            style={GlobalStyles.textInputContainer}
+            label='Location'
+            value={location}
+            onChangeText={text => Credential({ prop: 'location', value: text })}
+            theme={textInputTheme}
+          />
+          <View style={styles.switchStyle}>
+            <Text style={styles.veganText}>Vegetarian</Text>
+            <Switch
+              value={vegetarian}
+              color={Colors.mainForeGround}
+              onValueChange={() =>
+                Credential({ prop: 'vegetarian', value: !vegetarian })
+              }
             />
-          }
-          mode='outlined'
-          multiline={true}
-          style={GlobalStyles.textInputContainer}
-          label='Description'
-          value={description}
-          onChangeText={text => Credential({prop: 'description', value: text})}
-          theme={textInputTheme}
-        />
-        <View>{renderFileData()}</View>
-        <TouchableOpacity
-          onPress={() => chooseImage()}
-          style={GlobalStyles.buttonContainer}>
-          <Text style={GlobalStyles.buttonText}>Choose Image</Text>
-        </TouchableOpacity>
-        {showButton()}
-      </ScrollView>
-    </View>
+          </View>
+          <TextInput
+            right={
+              <TextInput.Icon
+                name={() => (
+                  <MaterialIcons
+                    name='description'
+                    color={Colors.mainForeGround}
+                    size={25}
+                  />
+                )}
+              />
+            }
+            mode='outlined'
+            multiline={true}
+            style={GlobalStyles.textInputContainer}
+            label='Description'
+            value={description}
+            onChangeText={text => Credential({ prop: 'description', value: text })}
+            theme={textInputTheme}
+          />
+          <View>{renderFileData()}</View>
+          <TouchableOpacity
+            onPress={() => chooseImage()}
+            style={GlobalStyles.buttonContainer}>
+            <Text style={GlobalStyles.buttonText}>Choose Image</Text>
+          </TouchableOpacity>
+          <View>{showButton()}</View>
+        </View>
+        </ScrollView>
+      </View>
   )
 }
 
@@ -238,7 +245,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.mainBackground,
   },
   innerContainer: {
-    top: hp('10%'),
+    marginTop: hp('5%'),
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -249,20 +256,20 @@ const styles = StyleSheet.create({
   },
   switchStyle: {
     flexDirection: 'row',
-    marginRight: wp('63%'),
+    marginRight: wp('55%'),
   },
   images: {
     width: wp('35%'),
     height: hp('25%'),
-  },spinnerContainer: {
-        height: hp('2.5%'),
-        justifyContent: 'center',
-        alignItems: 'center',
-        margin: hp('5%'),
-    }, 
+  }, spinnerContainer: {
+    height: hp('2.5%'),
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: hp('5%'),
+  },
 })
 
-const mapStateToProps = ({StallReducer}) => {
+const mapStateToProps = ({ StallReducer }) => {
   return {
     name: StallReducer.name,
     providedPicture: StallReducer.providedPicture,
