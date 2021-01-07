@@ -22,6 +22,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Spinner from './common/Spinner';
 import ImgToBase64 from 'react-native-image-base64'
 import { launchImageLibrary } from 'react-native-image-picker/src'
+import * as ImagePicker from 'expo-image-picker';
 
 interface Cred {
   prop: string
@@ -31,7 +32,6 @@ interface Cred {
 interface Props {
   navigation: DrawerNavigationProp<any, any>
   name: string
-  providedPicture: boolean
   description: string
   location: string
   vegetarian: boolean
@@ -44,7 +44,6 @@ interface Props {
     location: string,
     description: string,
     imagePicker: string,
-    providedPicture: boolean,
     vegetarian: boolean,
   ) => void
 }
@@ -52,7 +51,6 @@ interface Props {
 const Cart: React.FC<Props> = props => {
   const {
     name,
-    providedPicture,
     location,
     vegetarian,
     navigation,
@@ -89,20 +87,22 @@ const Cart: React.FC<Props> = props => {
     }
   }
 
-  const chooseImage = () => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-        includeBase64: true,
-        maxHeight: 300,
-        maxWidth: 400,
-      },
-      (response) => {
-        ImgToBase64.getBase64String(response.uri)
-          .then(base64String => setImagePicker(base64String))
-          .catch(err => console.error(err));
-      })
-  }
+  const chooseImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [3, 2],
+      quality: 0.5,
+    });
+
+    if (!result.cancelled) {
+      ImgToBase64.getBase64String(result.uri)
+        .then(base64String => setImagePicker(base64String))
+        .catch(err => console.error(err));
+    }else{
+      setImagePicker('');
+    }
+  };
 
   const checkStallDetails = () => {
     if (!name || name.length < 2) {
@@ -117,14 +117,11 @@ const Cart: React.FC<Props> = props => {
       Alert.alert('Stall Description must be 5-280 chars long')
     } else {
       if (checkSimilarity(allStalls, name) === false) {
-        if (!imagePicker) Credential({ prop: 'providedPicture', value: false })
-        else Credential({ prop: 'providedPicture', value: true })
         AddStallToDB(
           name,
           location,
           description,
           imagePicker,
-          providedPicture,
           vegetarian,
         )
       } else {
@@ -153,16 +150,16 @@ const Cart: React.FC<Props> = props => {
   }
 
   return (
-      <View style={styles.container}>
-        <HeaderArrow
-          HeaderText={'Add Food Stall'}
-          HeaderStyle={{ backgroundColor: 'transparent' }}
-          TextStyle={GlobalStyles.headerTextStyle}
-          navigateMeBack={() => DrawerNavigationToggle()}
-          iconName={'menu'}
-          iconColor={Colors.mainForeGround}
-        />
-        <ScrollView contentContainerStyle={{flexGrow: 1}}>
+    <View style={styles.container}>
+      <HeaderArrow
+        HeaderText={'Add Food Stall'}
+        HeaderStyle={{ backgroundColor: 'transparent' }}
+        TextStyle={GlobalStyles.headerTextStyle}
+        navigateMeBack={() => DrawerNavigationToggle()}
+        iconName={'menu'}
+        iconColor={Colors.mainForeGround}
+      />
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.innerContainer}>
           <TextInput
             right={
@@ -234,8 +231,8 @@ const Cart: React.FC<Props> = props => {
           </TouchableOpacity>
           <View>{showButton()}</View>
         </View>
-        </ScrollView>
-      </View>
+      </ScrollView>
+    </View>
   )
 }
 
@@ -259,7 +256,7 @@ const styles = StyleSheet.create({
     marginRight: wp('55%'),
   },
   images: {
-    width: wp('35%'),
+    width: wp('55%'),
     height: hp('25%'),
   }, spinnerContainer: {
     height: hp('2.5%'),
@@ -272,7 +269,6 @@ const styles = StyleSheet.create({
 const mapStateToProps = ({ StallReducer }) => {
   return {
     name: StallReducer.name,
-    providedPicture: StallReducer.providedPicture,
     location: StallReducer.location,
     vegetarian: StallReducer.vegetarian,
     description: StallReducer.description,

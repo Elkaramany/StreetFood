@@ -21,7 +21,6 @@ import {Colors, textInputTheme, GlobalStyles} from './Constants'
 
 interface stallArr {
   name: string
-  providedPicture: boolean | null
   location: string
   vegetarian: boolean | null
   description: string
@@ -54,8 +53,8 @@ const UserMenu: React.FC<Props> = props => {
     }
   }
 
-  const hasPicture = (providedPicture, picture) => {
-    if (picture) {
+  const hasPicture = (picture) => {
+    if (picture && picture.length > 63) {
       return (
         <View style={{justifyContent: 'center', alignItems: 'center'}}>
           <Image
@@ -91,7 +90,7 @@ const UserMenu: React.FC<Props> = props => {
           <Text style={styles.stallName}>{item.data().description}</Text>
         </View>
         {isVegan(item.data().vegetarian)}
-        {hasPicture(item.data().providedPicture, item.data().imagePicker)}
+        {hasPicture(item.data().imagePicker)}
         <TouchableOpacity
           onPress={() => props.navigation.navigate('SingleStall',{
             item

@@ -1,6 +1,5 @@
 interface Props {
   name: string,
-  providedPicture: boolean,
   location: string,
   vegetarian: boolean,
   description: string,
@@ -13,7 +12,6 @@ const INITIAL_STATE: Props = {
   location: '',
   description: '',
   vegetarian: false,
-  providedPicture: false,
   allStalls: [],
   stallLoading: false
 }

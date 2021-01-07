@@ -4,7 +4,6 @@ import { Alert } from 'react-native'
 
 interface stallArr {
   name: string
-  providedPicture: boolean | null
   location: string
   vegetarian: boolean | null
   description: string
@@ -16,7 +15,6 @@ export const AddStallToDB = (
   location: string,
   description: string,
   imagePicker: string,
-  providedPicture: boolean,
   vegetarian: boolean,
 ) => {
   return dispatch => {
@@ -28,7 +26,6 @@ export const AddStallToDB = (
         location,
         description,
         imagePicker,
-        providedPicture,
         vegetarian,
         reviews: [],
       })
@@ -38,6 +35,7 @@ export const AddStallToDB = (
       })
       .catch(err => {
         Alert.alert('Error adding the stall')
+        console.error(err)
         dispatch({ type: 'flipLoading', value: false })
       })
   }
@@ -76,12 +74,16 @@ export const checkSimilarity = (allStalls: any[], name: string) => {
   }
 }
 
+interface singleReview{
+  reviewId: number,
+  reviewText: string,
+}
+
 export const writeStallReview = (review: string, docId: number, name: string,
   location: string,
   description: string,
   imagePicker: string,
-  providedPicture: boolean,
-  vegetarian: boolean, reviews: any[], userId: number) => {
+  vegetarian: boolean, reviews: singleReview[], userId: number) => {
   return dispatch => {
     reviews.push({ reviewId: userId, reviewText: review })
     firestore().collection('Stalls').doc(docId.toString())
@@ -90,7 +92,6 @@ export const writeStallReview = (review: string, docId: number, name: string,
         location,
         description,
         imagePicker,
-        providedPicture,
         vegetarian,
         reviews,
       }).then(() => {

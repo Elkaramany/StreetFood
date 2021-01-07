@@ -21,7 +21,6 @@ import {TextInput} from 'react-native-paper'
 
 interface Props {
   name: string
-  providedPicture: boolean | null
   location: string
   vegetarian: boolean | null
   description: string
@@ -37,7 +36,6 @@ interface Props {
     location: string,
     description: string,
     imagePicker: string,
-    providedPicture: boolean,
     vegetarian: boolean,
     reviews: any[],
     userId: number,
@@ -63,8 +61,8 @@ const SingleStall: React.FC<Props> = props => {
     }
   }
 
-  const hasPicture = (providedPicture, picture) => {
-    if (providedPicture === true) {
+  const hasPicture = (picture) => {
+    if (picture && picture.length > 63 === true) {
       return (
         <View style={{justifyContent: 'center', alignItems: 'center'}}>
           <Image
@@ -131,7 +129,6 @@ const SingleStall: React.FC<Props> = props => {
         location,
         description,
         imagePicker,
-        providedPicture,
         vegetarian,
         reviews,
       } = singleItem
@@ -143,7 +140,6 @@ const SingleStall: React.FC<Props> = props => {
         location,
         description,
         imagePicker,
-        providedPicture,
         vegetarian,
         reviews,
         userId,
@@ -175,7 +171,7 @@ const SingleStall: React.FC<Props> = props => {
           <Text style={styles.stallName}>{singleItem.description}</Text>
         </View>
         {isVegan(singleItem.vegetarian)}
-        {hasPicture(singleItem.providedPicture, singleItem.imagePicker)}
+        {hasPicture(singleItem.imagePicker)}
         {hasReviews(singleItem.reviews)}
         <TouchableOpacity
           onPress={() => addReview(props.route.params.item.id)}
